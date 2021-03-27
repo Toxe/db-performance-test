@@ -15,5 +15,6 @@ include(cmake/StaticAnalyzers.cmake)
 include(cmake/Sanitizers.cmake)
 
 find_package(clipp CONFIG REQUIRED)
+find_package(fmt CONFIG REQUIRED)
 
 add_subdirectory(src)

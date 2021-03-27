@@ -4,6 +4,8 @@ Dependencies:
 
 - cmake
 - vcpkg
+    - spdlog
+    - fmt
     - clipp
     - cpr
     - nlohmann-json
@@ -23,6 +25,6 @@ Dependencies:
     - db_insert
     - html_ping
 
-db_insert --single
-db_insert --multi
+db_insert --single  
+db_insert --multi  
 db_insert --all

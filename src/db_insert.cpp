@@ -1,17 +1,15 @@
 #include <filesystem>
-#include <iostream>
 #include <tuple>
 
 #include <clipp.h>
+#include <fmt/core.h>
+#include <fmt/ostream.h>
 #include <spdlog/spdlog.h>
 
-void show_usage_and_exit(const clipp::group& cli, const char* argv0, const char* error_message = nullptr)
+void show_usage_and_exit(const clipp::group& cli, const char* argv0)
 {
-    if (error_message)
-        std::cout << error_message << "\n\n";
-
     std::string progname{std::filesystem::path{argv0}.filename().string()};
-    std::cout << clipp::make_man_page(cli, progname).prepend_section("DESCRIPTION", "    Run database performance tests.") << '\n';
+    fmt::print("{}", clipp::make_man_page(cli, progname).prepend_section("DESCRIPTION", "    Run database performance tests."));
 
     std::exit(1);
 }

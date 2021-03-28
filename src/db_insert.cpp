@@ -80,10 +80,10 @@ auto eval_args(int argc, char* argv[])
         show_usage_and_exit(cli, argv[0]);
 
     spdlog::set_level(log_level);
-    spdlog::info("CLI option --single: {}", run_single);
-    spdlog::info("CLI option --multi: {}", run_multi);
-    spdlog::info("CLI option --all: {}", run_all);
-    spdlog::info("CLI option --config: {}", db_config_filename);
+    spdlog::info("command line option --single: {}", run_single);
+    spdlog::info("command line option --multi: {}", run_multi);
+    spdlog::info("command line option --all: {}", run_all);
+    spdlog::info("command line option --config: {}", db_config_filename);
 
     if (run_all) {
         run_single = true;

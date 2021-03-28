@@ -68,12 +68,12 @@ auto eval_args(int argc, char* argv[])
     std::string db_config_filename{"mysql.json"};
 
     auto cli = (
-        (clipp::option("--single").set(run_single).set(run_all, false).doc("run single inserts for every row"),
-         clipp::option("--multi").set(run_multi).set(run_all, false).doc("insert multiple rows in one request")) |
-        clipp::option("--all").set(run_all).doc("run all tests (default)"),
+        (clipp::option("--single").set(run_single).set(run_all, false)             % "run test: single inserts for every row",
+         clipp::option("--multi").set(run_multi).set(run_all, false)               % "run test: insert multiple rows in one request") |
+        clipp::option("--all").set(run_all)                                        % "run all tests (default)",
         (clipp::option("--config") & clipp::value("filename", db_config_filename)) % fmt::format("database connection config (default: {})", db_config_filename),
-        clipp::option("-h", "--help").set(show_help).doc("show help"),
-        clipp::option("-v", "--verbose").set(log_level, spdlog::level::info).doc("show verbose output")
+        clipp::option("-h", "--help").set(show_help)                               % "show help",
+        clipp::option("-v", "--verbose").set(log_level, spdlog::level::info)       % "show verbose output"
     );
 
     if (!clipp::parse(argc, argv, cli))

@@ -16,5 +16,6 @@ include(cmake/Sanitizers.cmake)
 
 find_package(clipp CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 
 add_subdirectory(src)

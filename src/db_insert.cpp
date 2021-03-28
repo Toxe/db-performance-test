@@ -4,6 +4,7 @@
 #include <clipp.h>
 #include <fmt/core.h>
 #include <fmt/ostream.h>
+#include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 
 void show_usage_and_exit(const clipp::group& cli, const char* argv0)

@@ -96,11 +96,17 @@ auto eval_args(int argc, char* argv[])
     return std::make_tuple(run_single, run_multi, db_config_filename);
 }
 
+sqlpp::mysql::connection db_connect(const std::shared_ptr<sqlpp::mysql::connection_config> config)
+{
+    spdlog::info("connecting to database \"{}\"", config->database);
+    return sqlpp::mysql::connection(config);
+}
+
 int main(int argc, char* argv[])
 {
     auto [run_single, run_multi, db_config_filename] = eval_args(argc, argv);
     auto config = read_mysql_config(db_config_filename);
-    sqlpp::mysql::connection db(config);
+    auto db = db_connect(config);
 
     spdlog::info("run single test: {}", run_single);
     spdlog::info("run multi test: {}", run_multi);

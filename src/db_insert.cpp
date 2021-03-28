@@ -21,13 +21,13 @@
 //       "database": "db_performance_test",
 //       "unix_socket": "/tmp/mysql.sock"
 //   }
-std::shared_ptr<sqlpp::mysql::connection_config> read_mysql_config(const char* filename)
+std::shared_ptr<sqlpp::mysql::connection_config> read_mysql_config(const std::string& db_config_filename)
 {
-    std::ifstream in(filename);
-    spdlog::info("open database config file: {}", filename);
+    std::ifstream in(db_config_filename);
+    spdlog::info("open database config file: {}", db_config_filename);
 
     if (!in.is_open()) {
-        spdlog::error("database config file not found: {}", filename);
+        spdlog::error("database config file not found: {}", db_config_filename);
         std::exit(2);
     }
 
@@ -65,11 +65,13 @@ auto eval_args(int argc, char* argv[])
     bool run_all = true;
     bool show_help = false;
     auto log_level = spdlog::level::warn;
+    std::string db_config_filename{"mysql.json"};
 
     auto cli = (
         (clipp::option("--single").set(run_single).set(run_all, false).doc("run single inserts for every row"),
          clipp::option("--multi").set(run_multi).set(run_all, false).doc("insert multiple rows in one request")) |
         clipp::option("--all").set(run_all).doc("run all tests (default)"),
+        (clipp::option("--config") & clipp::value("filename", db_config_filename)) % fmt::format("database connection config (default: {})", db_config_filename),
         clipp::option("-h", "--help").set(show_help).doc("show help"),
         clipp::option("-v", "--verbose").set(log_level, spdlog::level::info).doc("show verbose output")
     );
@@ -81,6 +83,7 @@ auto eval_args(int argc, char* argv[])
     spdlog::info("CLI option --single: {}", run_single);
     spdlog::info("CLI option --multi: {}", run_multi);
     spdlog::info("CLI option --all: {}", run_all);
+    spdlog::info("CLI option --config: {}", db_config_filename);
 
     if (run_all) {
         run_single = true;
@@ -90,13 +93,13 @@ auto eval_args(int argc, char* argv[])
     if (show_help || !(run_single || run_multi))
         show_usage_and_exit(cli, argv[0]);
 
-    return std::make_tuple(run_single, run_multi);
+    return std::make_tuple(run_single, run_multi, db_config_filename);
 }
 
 int main(int argc, char* argv[])
 {
-    auto [run_single, run_multi] = eval_args(argc, argv);
-    auto config = read_mysql_config("mysql.json");
+    auto [run_single, run_multi, db_config_filename] = eval_args(argc, argv);
+    auto config = read_mysql_config(db_config_filename);
     sqlpp::mysql::connection db(config);
 
     spdlog::info("run single test: {}", run_single);

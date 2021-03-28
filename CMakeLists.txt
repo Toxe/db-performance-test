@@ -17,5 +17,7 @@ include(cmake/Sanitizers.cmake)
 find_package(clipp CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
+find_package(Sqlpp11 CONFIG REQUIRED)
+find_library(sqlpp11_mysql_LIBRARY sqlpp-mysql)
 
 add_subdirectory(src)

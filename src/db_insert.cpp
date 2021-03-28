@@ -6,6 +6,9 @@
 #include <fmt/ostream.h>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
+#include <sqlpp11/mysql/mysql.h>
+#include <sqlpp11/sqlpp11.h>
+
 
 void show_usage_and_exit(const clipp::group& cli, const char* argv0)
 {

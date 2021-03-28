@@ -11,4 +11,4 @@ foreach(target ${ALL_TARGETS})
     target_link_libraries(${target} PRIVATE ${SANITIZER_FLAGS})
 endforeach()
 
-target_link_libraries(db_insert PRIVATE clipp::clipp fmt::fmt nlohmann_json::nlohmann_json ${sqlpp11_mysql_LIBRARY})
+target_link_libraries(db_insert PRIVATE clipp::clipp fmt::fmt nlohmann_json::nlohmann_json OpenSSL::SSL OpenSSL::Crypto ZLIB::ZLIB ${sqlpp11_mysql_LIBRARY} ${mariadb_LIBRARY})

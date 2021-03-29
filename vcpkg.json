@@ -8,6 +8,10 @@
             "version>=": "2019-04-30"
         },
         {
+            "name": "cpr",
+            "version>=": "1.5.2"
+        },
+        {
             "name": "nlohmann-json",
             "version>=": "3.9.1"
         },

@@ -1,6 +1,7 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
+#include <string_view>
 #include <tuple>
 
 #include <clipp.h>
@@ -10,6 +11,8 @@
 #include <spdlog/spdlog.h>
 #include <sqlpp11/mysql/mysql.h>
 #include <sqlpp11/sqlpp11.h>
+
+using namespace std::chrono_literals;
 
 // Read JSON MySQL config file.
 //
@@ -96,17 +99,43 @@ auto eval_args(int argc, char* argv[])
     return std::make_tuple(run_single, run_multi, db_config_filename);
 }
 
-sqlpp::mysql::connection db_connect(const std::shared_ptr<sqlpp::mysql::connection_config> config)
+sqlpp::mysql::connection connect_database(const std::shared_ptr<sqlpp::mysql::connection_config> config)
 {
     spdlog::info("connecting to database \"{}\"", config->database);
     return sqlpp::mysql::connection(config);
+}
+
+void drop_table(sqlpp::mysql::connection& db, const std::string_view& table_name)
+{
+    spdlog::info("drop table \"{}\"", table_name);
+
+    db.execute(fmt::format("DROP TABLE IF EXISTS {}", table_name));
+}
+
+void create_table(sqlpp::mysql::connection& db, const std::string_view& table_name)
+{
+    spdlog::info("create table \"{}\"", table_name);
+
+    db.execute(fmt::format(
+        "CREATE TABLE {} ("
+        "    id     INT NOT NULL AUTO_INCREMENT,"
+        "    time   DATETIME NOT NULL,"
+        "    text   VARCHAR(255) NOT NULL,"
+        "    PRIMARY KEY (id)"
+        ") CHARSET=utf8 COLLATE=utf8_unicode_ci",
+        table_name));
+
+    std::this_thread::sleep_for(1s);
 }
 
 int main(int argc, char* argv[])
 {
     auto [run_single, run_multi, db_config_filename] = eval_args(argc, argv);
     auto config = read_mysql_config(db_config_filename);
-    auto db = db_connect(config);
+    auto db = connect_database(config);
+
+    drop_table(db, "performance");
+    create_table(db, "performance");
 
     spdlog::info("run single test: {}", run_single);
     spdlog::info("run multi test: {}", run_multi);

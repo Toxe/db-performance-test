@@ -64,58 +64,6 @@ void show_usage_and_exit(const clipp::group& cli, const char* argv0)
     std::exit(1);
 }
 
-auto eval_args(int argc, char* argv[])
-{
-    int num_insert_rows = 10000;
-    int num_rows_per_multi_insert = 1000;
-    bool run_single = false;
-    bool run_multi = false;
-    bool run_all = true;
-    bool show_help = false;
-    auto log_level = spdlog::level::warn;
-    std::string db_config_filename{"mysql.json"};
-
-    auto cli = (
-        (clipp::option("--single").set(run_single).set(run_all, false)
-            % "run test: single inserts for every row",
-         clipp::option("--multi").set(run_multi).set(run_all, false)
-            % "run test: insert multiple rows in one request") |
-        clipp::option("--all").set(run_all)
-            % "run all tests (default)",
-        (clipp::option("--config") & clipp::value("filename", db_config_filename))
-            % fmt::format("database connection config (default: {})", db_config_filename),
-        (clipp::option("--rows") & clipp::value("num_insert_rows", num_insert_rows))
-            % fmt::format("number of insert rows (default: {})", num_insert_rows),
-        (clipp::option("--rows_per_multi_insert") & clipp::value("num_rows_per_multi_insert", num_rows_per_multi_insert))
-            % fmt::format("number of rows per multi insert (default: {})", num_rows_per_multi_insert),
-        clipp::option("-h", "--help").set(show_help)
-            % "show help",
-        clipp::option("-v", "--verbose").set(log_level, spdlog::level::info)
-            % "show verbose output"
-    );
-
-    if (!clipp::parse(argc, argv, cli))
-        show_usage_and_exit(cli, argv[0]);
-
-    spdlog::set_level(log_level);
-    spdlog::info("command line option --single: {}", run_single);
-    spdlog::info("command line option --multi: {}", run_multi);
-    spdlog::info("command line option --all: {}", run_all);
-    spdlog::info("command line option --config: {}", db_config_filename);
-    spdlog::info("command line option --rows: {}", num_insert_rows);
-    spdlog::info("command line option --rows_per_multi_insert: {}", num_rows_per_multi_insert);
-
-    if (run_all) {
-        run_single = true;
-        run_multi = true;
-    }
-
-    if (show_help || !(run_single || run_multi))
-        show_usage_and_exit(cli, argv[0]);
-
-    return std::make_tuple(run_single, run_multi, db_config_filename, num_insert_rows, num_rows_per_multi_insert);
-}
-
 sqlpp::mysql::connection connect_database(const std::shared_ptr<sqlpp::mysql::connection_config> config)
 {
     spdlog::info("connecting to database \"{}\"", config->database);
@@ -190,6 +138,58 @@ void test_multiple_inserts(sqlpp::mysql::connection& db, const int num_insert_ro
     auto t1 = std::chrono::high_resolution_clock::now();
 
     fmt::print("test multi: {} rows in {} ms\n", num_insert_rows, std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count());
+}
+
+auto eval_args(int argc, char* argv[])
+{
+    int num_insert_rows = 10000;
+    int num_rows_per_multi_insert = 1000;
+    bool run_single = false;
+    bool run_multi = false;
+    bool run_all = true;
+    bool show_help = false;
+    auto log_level = spdlog::level::warn;
+    std::string db_config_filename{"mysql.json"};
+
+    auto cli = (
+        (clipp::option("--single").set(run_single).set(run_all, false)
+            % "run test: single inserts for every row",
+         clipp::option("--multi").set(run_multi).set(run_all, false)
+            % "run test: insert multiple rows in one request") |
+        clipp::option("--all").set(run_all)
+            % "run all tests (default)",
+        (clipp::option("--config") & clipp::value("filename", db_config_filename))
+            % fmt::format("database connection config (default: {})", db_config_filename),
+        (clipp::option("--rows") & clipp::value("num_insert_rows", num_insert_rows))
+            % fmt::format("number of insert rows (default: {})", num_insert_rows),
+        (clipp::option("--rows_per_multi_insert") & clipp::value("num_rows_per_multi_insert", num_rows_per_multi_insert))
+            % fmt::format("number of rows per multi insert (default: {})", num_rows_per_multi_insert),
+        clipp::option("-h", "--help").set(show_help)
+            % "show help",
+        clipp::option("-v", "--verbose").set(log_level, spdlog::level::info)
+            % "show verbose output"
+    );
+
+    if (!clipp::parse(argc, argv, cli))
+        show_usage_and_exit(cli, argv[0]);
+
+    spdlog::set_level(log_level);
+    spdlog::info("command line option --single: {}", run_single);
+    spdlog::info("command line option --multi: {}", run_multi);
+    spdlog::info("command line option --all: {}", run_all);
+    spdlog::info("command line option --config: {}", db_config_filename);
+    spdlog::info("command line option --rows: {}", num_insert_rows);
+    spdlog::info("command line option --rows_per_multi_insert: {}", num_rows_per_multi_insert);
+
+    if (run_all) {
+        run_single = true;
+        run_multi = true;
+    }
+
+    if (show_help || !(run_single || run_multi))
+        show_usage_and_exit(cli, argv[0]);
+
+    return std::make_tuple(run_single, run_multi, db_config_filename, num_insert_rows, num_rows_per_multi_insert);
 }
 
 int main(int argc, char* argv[])

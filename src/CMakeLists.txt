@@ -2,7 +2,7 @@ set(ALL_TARGETS
     db_insert
 )
 
-add_executable(db_insert db_insert.cpp)
+add_executable(db_insert db_insert.cpp include/performance.h)
 
 foreach(target ${ALL_TARGETS})
     set_target_properties(${target} PROPERTIES CXX_EXTENSIONS OFF)
@@ -11,4 +11,5 @@ foreach(target ${ALL_TARGETS})
     target_link_libraries(${target} PRIVATE ${SANITIZER_FLAGS})
 endforeach()
 
+target_include_directories(db_insert PRIVATE include)
 target_link_libraries(db_insert PRIVATE clipp::clipp fmt::fmt nlohmann_json::nlohmann_json OpenSSL::SSL OpenSSL::Crypto ZLIB::ZLIB ${sqlpp11_mysql_LIBRARY} ${mariadb_LIBRARY})

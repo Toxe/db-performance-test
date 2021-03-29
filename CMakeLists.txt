@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.13)
 set(VCPKG_FEATURE_FLAGS versions)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-project("Database Performance Testzers" LANGUAGES CXX)
+project("Database Performance Test" LANGUAGES CXX)
 
 # default compiler options and warnings
 include(cmake/DefaultCompilerOptionsAndWarnings.cmake)

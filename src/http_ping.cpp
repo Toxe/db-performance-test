@@ -86,7 +86,7 @@ std::optional<double> ping(const std::string& url, std::chrono::milliseconds tim
     return {};
 }
 
-void continuously_ping_url(const std::string& url, std::chrono::seconds interval, std::chrono::milliseconds timeout)
+void continuously_send_pings(const std::string& url, std::chrono::seconds interval, std::chrono::milliseconds timeout)
 {
     spdlog::info("pinging {}...", url);
 
@@ -163,5 +163,5 @@ int main(int argc, char* argv[])
     std::signal(SIGINT, signal_handler);
     create_ping_logger(logfile_name);
 
-    continuously_ping_url(url, interval, timeout);
+    continuously_send_pings(url, interval, timeout);
 }

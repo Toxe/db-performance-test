@@ -122,7 +122,7 @@ auto eval_args(int argc, char* argv[])
     bool show_help = false;
     auto log_level = spdlog::level::warn;
     int interval = 1;
-    int timeout = 1000;
+    int timeout = 30000;
     std::string url;
     std::string logfile_name{"logs/http_ping.log"};
 

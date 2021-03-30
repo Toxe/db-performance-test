@@ -68,7 +68,7 @@ std::optional<double> ping(const std::string& url)
     const auto r = cpr::Get(cpr::Url{url});
 
     if (r.status_code == 200) {
-        spdlog::get("ping")->info("{:.0f} ms", r.elapsed * 1000.0);
+        spdlog::get("ping")->info("{:.0f}ms", r.elapsed * 1000.0);
         return {r.elapsed};
     }
 
@@ -99,8 +99,8 @@ void continuously_ping_url(const std::string& url)
     }
 
     fmt::print("pings successful: {}, errors: {}\n", durations.size(), errors);
-    fmt::print("mean: {:.2f} ms\n", 1000.0 * mean(durations));
-    fmt::print("median: {:.2f} ms\n", 1000.0 * median(durations));
+    fmt::print("mean: {:.2f}ms\n", 1000.0 * mean(durations));
+    fmt::print("median: {:.2f}ms\n", 1000.0 * median(durations));
 }
 
 void show_usage_and_exit(const clipp::group& cli, const char* argv0)

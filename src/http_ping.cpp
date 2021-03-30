@@ -1,22 +1,38 @@
+#include <chrono>
+#include <csignal>
 #include <filesystem>
-#include <fstream>
 #include <string>
-#include <string_view>
 #include <thread>
 #include <tuple>
 
 #include <clipp.h>
 #include <cpr/cpr.h>
+#include <fmt/chrono.h>
 #include <fmt/core.h>
 #include <fmt/ostream.h>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 
+using namespace std::chrono_literals;
+
+bool running = true;
+
+void signal_handler(int signal)
+{
+    if (signal == SIGINT) {
+        fmt::print("\n");
+        running = false;
+    }
+}
+
 void ping(const std::string& url)
 {
-    const auto res = cpr::Get(cpr::Url{url});
+    while (running) {
+        const auto r = cpr::Get(cpr::Url{url});
 
-    spdlog::info("status_code: {}", res.status_code);
+        spdlog::info("{}, {} s", r.status_code, r.elapsed);
+        std::this_thread::sleep_for(1s);
+    }
 }
 
 void show_usage_and_exit(const clipp::group& cli, const char* argv0)
@@ -57,6 +73,8 @@ auto eval_args(int argc, char* argv[])
 int main(int argc, char* argv[])
 {
     auto [url] = eval_args(argc, argv);
+
+    std::signal(SIGINT, signal_handler);
 
     ping(url);
 }

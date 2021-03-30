@@ -1,6 +1,9 @@
+#include <algorithm>
 #include <chrono>
 #include <csignal>
 #include <filesystem>
+#include <numeric>
+#include <optional>
 #include <string>
 #include <thread>
 #include <tuple>
@@ -44,26 +47,60 @@ std::shared_ptr<spdlog::logger> create_ping_logger(const std::string& logfile_na
     return logger;
 }
 
-void ping(const std::string& url)
+double mean(const std::vector<double>& values)
+{
+    return std::accumulate(values.begin(), values.end(), 0.0) / static_cast<double>(values.size());
+}
+
+double median(const std::vector<double>& values)
+{
+    std::vector<double> sorted_values{values};
+    std::sort(sorted_values.begin(), sorted_values.end());
+
+    if (sorted_values.size() % 2)
+        return sorted_values[(sorted_values.size() - 1) / 2];
+    else
+        return (sorted_values[sorted_values.size() / 2 - 1] + sorted_values[sorted_values.size() / 2]) / 2.0;
+}
+
+std::optional<double> ping(const std::string& url)
 {
     const auto r = cpr::Get(cpr::Url{url});
 
-    if (r.status_code == 200)
+    if (r.status_code == 200) {
         spdlog::get("ping")->info("{:.0f} ms", r.elapsed * 1000.0);
-    else if (r.status_code > 0)
+        return {r.elapsed};
+    }
+
+    if (r.status_code > 0)
         spdlog::get("ping")->warn(r.status_line);
     else
         spdlog::get("ping")->error(r.error.message);
+
+    return {};
 }
 
 void continuously_ping_url(const std::string& url)
 {
     spdlog::info("pinging {}...", url);
 
+    int errors = 0;
+    std::vector<double> durations;
+
     while (running) {
-        ping(url);
+        auto ms = ping(url);
+
+        if (ms.has_value())
+            durations.push_back(ms.value());
+        else
+            ++errors;
+
         std::this_thread::sleep_for(1s);
     }
+
+    fmt::print("pings successful: {}, errors: {}\n", durations.size(), errors);
+    fmt::print("mean: {:.2f} ms\n", 1000.0 * mean(durations));
+    fmt::print("median: {:.2f} ms\n", 1000.0 * median(durations));
 }
 
 void show_usage_and_exit(const clipp::group& cli, const char* argv0)

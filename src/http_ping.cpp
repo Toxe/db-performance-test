@@ -1,6 +1,5 @@
 #include <chrono>
 #include <csignal>
-#include <filesystem>
 #include <optional>
 #include <string>
 #include <thread>
@@ -16,6 +15,7 @@
 
 #include "combined_logger.h"
 #include "statistics.h"
+#include "usage.h"
 
 using namespace std::chrono_literals;
 
@@ -67,14 +67,6 @@ auto continuously_send_pings(const std::string& url, std::chrono::seconds interv
     return std::make_tuple(durations, num_errors);
 }
 
-void show_usage_and_exit(const clipp::group& cli, const char* argv0)
-{
-    std::string progname{std::filesystem::path{argv0}.filename().string()};
-    fmt::print("{}", clipp::make_man_page(cli, progname).prepend_section("DESCRIPTION", "    Ping a URL."));
-
-    std::exit(1);
-}
-
 auto eval_args(int argc, char* argv[])
 {
     bool show_help = false;
@@ -100,7 +92,7 @@ auto eval_args(int argc, char* argv[])
     );
 
     if (!clipp::parse(argc, argv, cli))
-        show_usage_and_exit(cli, argv[0]);
+        show_usage_and_exit(cli, argv[0], "Ping a URL.");
 
     spdlog::set_level(log_level);
     spdlog::info("command line option \"url\": {}", url);
@@ -109,7 +101,7 @@ auto eval_args(int argc, char* argv[])
     spdlog::info("command line option --timeout: {}ms", timeout);
 
     if (show_help)
-        show_usage_and_exit(cli, argv[0]);
+        show_usage_and_exit(cli, argv[0], "Ping a URL.");
 
     return std::make_tuple(url, logfile_name, std::chrono::seconds{interval}, std::chrono::milliseconds{timeout});
 }

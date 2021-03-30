@@ -5,13 +5,16 @@ set(ALL_TARGETS
 )
 
 add_executable(db_insert db_insert.cpp
-                         performance.h)
+                         performance.h
+                         usage.cpp usage.h)
 add_executable(http_ping http_ping.cpp
                          combined_logger.cpp combined_logger.h
-                         statistics.cpp statistics.h)
+                         statistics.cpp statistics.h
+                         usage.cpp usage.h)
 add_executable(msg_ping msg_ping.cpp
                         combined_logger.cpp combined_logger.h
-                        statistics.cpp statistics.h)
+                        statistics.cpp statistics.h
+                        usage.cpp usage.h)
 
 foreach(target ${ALL_TARGETS})
     set_target_properties(${target} PROPERTIES CXX_EXTENSIONS OFF)

@@ -28,12 +28,12 @@ void signal_handler(int signal)
     }
 }
 
-std::shared_ptr<spdlog::logger> create_ping_logger()
+std::shared_ptr<spdlog::logger> create_ping_logger(const std::string& logfile_name)
 {
     auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_st>();
     console_sink->set_level(spdlog::level::info);
 
-    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_st>("logs/test.log", false);
+    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_st>(logfile_name, false);
     file_sink->set_level(spdlog::level::info);
 
     std::vector<spdlog::sink_ptr> sinks{console_sink, file_sink};
@@ -79,6 +79,7 @@ auto eval_args(int argc, char* argv[])
     bool show_help = false;
     auto log_level = spdlog::level::warn;
     std::string url;
+    std::string logfile_name{"logs/http_ping.log"};
 
     auto cli = (
         clipp::option("-h", "--help").set(show_help)
@@ -86,7 +87,9 @@ auto eval_args(int argc, char* argv[])
         clipp::option("-v", "--verbose").set(log_level, spdlog::level::info)
             % "show verbose output",
         clipp::value("host", url)
-            % "URL to ping"
+            % "URL to ping",
+        (clipp::option("--log") & clipp::value("logfile", logfile_name))
+            % fmt::format("logfile name (default: {})", logfile_name)
     );
 
     if (!clipp::parse(argc, argv, cli))
@@ -94,19 +97,20 @@ auto eval_args(int argc, char* argv[])
 
     spdlog::set_level(log_level);
     spdlog::info("command line option \"url\": {}", url);
+    spdlog::info("command line option --log: {}", logfile_name);
 
     if (show_help)
         show_usage_and_exit(cli, argv[0]);
 
-    return std::make_tuple(url);
+    return std::make_tuple(url, logfile_name);
 }
 
 int main(int argc, char* argv[])
 {
-    auto [url] = eval_args(argc, argv);
+    auto [url, logfile_name] = eval_args(argc, argv);
 
     std::signal(SIGINT, signal_handler);
-    create_ping_logger();
+    create_ping_logger(logfile_name);
 
     continuously_ping_url(url);
 }

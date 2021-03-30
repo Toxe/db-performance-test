@@ -4,4 +4,4 @@
 
 #include <clipp.h>
 
-void show_usage_and_exit(const clipp::group& cli, const char* argv0, const std::string_view& description);
+void show_usage_and_exit(const clipp::group& cli, const std::string_view& argv0, const std::string_view& description);

@@ -63,9 +63,9 @@ double median(const std::vector<double>& values)
         return (sorted_values[sorted_values.size() / 2 - 1] + sorted_values[sorted_values.size() / 2]) / 2.0;
 }
 
-std::optional<double> ping(const std::string& url)
+std::optional<double> ping(const std::string& url, std::chrono::milliseconds timeout)
 {
-    const auto r = cpr::Get(cpr::Url{url});
+    const auto r = cpr::Get(cpr::Url{url}, cpr::Timeout{timeout});
 
     if (r.status_code == 200) {
         spdlog::get("ping")->info("{:.0f}ms", r.elapsed * 1000.0);
@@ -80,7 +80,7 @@ std::optional<double> ping(const std::string& url)
     return {};
 }
 
-void continuously_ping_url(const std::string& url)
+void continuously_ping_url(const std::string& url, std::chrono::seconds interval, std::chrono::milliseconds timeout)
 {
     spdlog::info("pinging {}...", url);
 
@@ -88,14 +88,14 @@ void continuously_ping_url(const std::string& url)
     std::vector<double> durations;
 
     while (running) {
-        auto ms = ping(url);
+        auto ms = ping(url, timeout);
 
         if (ms.has_value())
             durations.push_back(ms.value());
         else
             ++errors;
 
-        std::this_thread::sleep_for(1s);
+        std::this_thread::sleep_for(interval);
     }
 
     fmt::print("pings successful: {}, errors: {}\n", durations.size(), errors);
@@ -115,6 +115,8 @@ auto eval_args(int argc, char* argv[])
 {
     bool show_help = false;
     auto log_level = spdlog::level::warn;
+    int interval = 1;
+    int timeout = 1000;
     std::string url;
     std::string logfile_name{"logs/http_ping.log"};
 
@@ -126,7 +128,11 @@ auto eval_args(int argc, char* argv[])
         clipp::value("host", url)
             % "URL to ping",
         (clipp::option("--log") & clipp::value("logfile", logfile_name))
-            % fmt::format("logfile name (default: {})", logfile_name)
+            % fmt::format("logfile name (default: {})", logfile_name),
+        (clipp::option("--interval") & clipp::integer("interval", interval))
+            % fmt::format("wait \"interval\" seconds between each request (default: {}s)", interval),
+        (clipp::option("--timeout") & clipp::integer("timeout", timeout))
+            % fmt::format("request timeout in milliseconds (default: {}ms)", timeout)
     );
 
     if (!clipp::parse(argc, argv, cli))
@@ -135,19 +141,21 @@ auto eval_args(int argc, char* argv[])
     spdlog::set_level(log_level);
     spdlog::info("command line option \"url\": {}", url);
     spdlog::info("command line option --log: {}", logfile_name);
+    spdlog::info("command line option --interval: {}s", interval);
+    spdlog::info("command line option --timeout: {}ms", timeout);
 
     if (show_help)
         show_usage_and_exit(cli, argv[0]);
 
-    return std::make_tuple(url, logfile_name);
+    return std::make_tuple(url, logfile_name, std::chrono::seconds{interval}, std::chrono::milliseconds{timeout});
 }
 
 int main(int argc, char* argv[])
 {
-    auto [url, logfile_name] = eval_args(argc, argv);
+    auto [url, logfile_name, interval, timeout] = eval_args(argc, argv);
 
     std::signal(SIGINT, signal_handler);
     create_ping_logger(logfile_name);
 
-    continuously_ping_url(url);
+    continuously_ping_url(url, interval, timeout);
 }

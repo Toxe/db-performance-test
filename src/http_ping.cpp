@@ -1,8 +1,6 @@
-#include <algorithm>
 #include <chrono>
 #include <csignal>
 #include <filesystem>
-#include <numeric>
 #include <optional>
 #include <string>
 #include <thread>
@@ -11,13 +9,14 @@
 
 #include <clipp.h>
 #include <cpr/cpr.h>
-#include <fmt/chrono.h>
 #include <fmt/core.h>
 #include <fmt/ostream.h>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
+
+#include "statistics.h"
 
 using namespace std::chrono_literals;
 
@@ -47,36 +46,12 @@ std::shared_ptr<spdlog::logger> create_ping_logger(const std::string& logfile_na
     return logger;
 }
 
-double mean(const std::vector<double>& values)
-{
-    if (values.empty())
-        return 0.0;
-
-    return std::accumulate(values.begin(), values.end(), 0.0) / static_cast<double>(values.size());
-}
-
-double median(const std::vector<double>& values)
-{
-    if (values.empty())
-        return 0.0;
-
-    std::vector<double> sorted_values{values};
-    std::sort(sorted_values.begin(), sorted_values.end());
-
-    if (sorted_values.size() % 2)
-        return sorted_values[(sorted_values.size() - 1) / 2];
-    else
-        return (sorted_values[sorted_values.size() / 2 - 1] + sorted_values[sorted_values.size() / 2]) / 2.0;
-}
-
-std::optional<double> ping(const std::string& url, std::chrono::milliseconds timeout)
+std::optional<float> ping(const std::string& url, std::chrono::milliseconds timeout)
 {
     const auto r = cpr::Get(cpr::Url{url}, cpr::Timeout{timeout});
 
-    if (r.status_code == 200) {
-        spdlog::get("ping")->info("{:.0f}ms", r.elapsed * 1000.0);
-        return {r.elapsed};
-    }
+    if (r.status_code == 200)
+        return {1000.0f * static_cast<float>(r.elapsed)};
 
     if (r.status_code > 0)
         spdlog::get("ping")->warn(r.status_line);
@@ -86,27 +61,27 @@ std::optional<double> ping(const std::string& url, std::chrono::milliseconds tim
     return {};
 }
 
-void continuously_send_pings(const std::string& url, std::chrono::seconds interval, std::chrono::milliseconds timeout)
+auto continuously_send_pings(const std::string& url, std::chrono::seconds interval, std::chrono::milliseconds timeout)
 {
     spdlog::info("pinging {}...", url);
 
-    int errors = 0;
-    std::vector<double> durations;
+    int num_errors = 0;
+    std::vector<float> durations;
 
     while (running) {
         auto ms = ping(url, timeout);
 
-        if (ms.has_value())
+        if (ms.has_value()) {
+            spdlog::get("ping")->info("{:.0f}ms", ms.value());
             durations.push_back(ms.value());
-        else
-            ++errors;
+        } else {
+            ++num_errors;
+        }
 
         std::this_thread::sleep_for(interval);
     }
 
-    fmt::print("pings successful: {}, errors: {}\n", durations.size(), errors);
-    fmt::print("mean: {:.2f}ms\n", 1000.0 * mean(durations));
-    fmt::print("median: {:.2f}ms\n", 1000.0 * median(durations));
+    return std::make_tuple(durations, num_errors);
 }
 
 void show_usage_and_exit(const clipp::group& cli, const char* argv0)
@@ -163,5 +138,7 @@ int main(int argc, char* argv[])
     std::signal(SIGINT, signal_handler);
     create_ping_logger(logfile_name);
 
-    continuously_send_pings(url, interval, timeout);
+    const auto [durations, num_errors] = continuously_send_pings(url, interval, timeout);
+
+    show_stats(durations, num_errors);
 }

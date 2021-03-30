@@ -4,9 +4,12 @@ set(ALL_TARGETS
     msg_ping
 )
 
-add_executable(db_insert db_insert.cpp performance.h)
-add_executable(http_ping http_ping.cpp)
-add_executable(msg_ping msg_ping.cpp)
+add_executable(db_insert db_insert.cpp
+                         performance.h)
+add_executable(http_ping http_ping.cpp
+                         statistics.cpp statistics.h)
+add_executable(msg_ping msg_ping.cpp
+                        statistics.cpp statistics.h)
 
 foreach(target ${ALL_TARGETS})
     set_target_properties(${target} PROPERTIES CXX_EXTENSIONS OFF)

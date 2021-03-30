@@ -1,8 +1,6 @@
-#include <algorithm>
 #include <chrono>
 #include <csignal>
 #include <filesystem>
-#include <numeric>
 #include <optional>
 #include <string>
 #include <thread>
@@ -11,13 +9,14 @@
 
 #include <clipp.h>
 #include <cpr/cpr.h>
-#include <fmt/chrono.h>
 #include <fmt/core.h>
 #include <fmt/ostream.h>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
+
+#include "statistics.h"
 
 using namespace std::chrono_literals;
 
@@ -45,28 +44,6 @@ std::shared_ptr<spdlog::logger> create_ping_logger(const std::string& logfile_na
     spdlog::register_logger(logger);
 
     return logger;
-}
-
-float mean(const std::vector<float>& values)
-{
-    if (values.empty())
-        return 0.0f;
-
-    return std::accumulate(values.begin(), values.end(), 0.0f) / static_cast<float>(values.size());
-}
-
-float median(const std::vector<float>& values)
-{
-    if (values.empty())
-        return 0.0f;
-
-    std::vector<float> sorted_values{values};
-    std::sort(sorted_values.begin(), sorted_values.end());
-
-    if (sorted_values.size() % 2)
-        return sorted_values[(sorted_values.size() - 1) / 2];
-    else
-        return (sorted_values[sorted_values.size() / 2 - 1] + sorted_values[sorted_values.size() / 2]) / 2.0f;
 }
 
 std::optional<float> msg(cpr::Session& sess, const std::string& fqmn, std::vector<cpr::Pair> data)
@@ -145,13 +122,6 @@ void logout(cpr::Session& sess)
     spdlog::info("logout...");
 
     msg(sess, "login.logout", {});
-}
-
-void show_stats(const std::vector<float>& durations, const int num_errors)
-{
-    fmt::print("messages successful: {}, errors: {}\n", durations.size(), num_errors);
-    fmt::print("mean: {:.2f}ms\n", mean(durations));
-    fmt::print("median: {:.2f}ms\n", median(durations));
 }
 
 void show_usage_and_exit(const clipp::group& cli, const char* argv0)

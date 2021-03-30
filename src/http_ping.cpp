@@ -4,6 +4,7 @@
 #include <string>
 #include <thread>
 #include <tuple>
+#include <vector>
 
 #include <clipp.h>
 #include <cpr/cpr.h>
@@ -12,6 +13,8 @@
 #include <fmt/ostream.h>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
 
 using namespace std::chrono_literals;
 
@@ -25,12 +28,40 @@ void signal_handler(int signal)
     }
 }
 
+std::shared_ptr<spdlog::logger> create_ping_logger()
+{
+    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_st>();
+    console_sink->set_level(spdlog::level::info);
+
+    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_st>("logs/test.log", false);
+    file_sink->set_level(spdlog::level::info);
+
+    std::vector<spdlog::sink_ptr> sinks{console_sink, file_sink};
+    auto logger = std::make_shared<spdlog::logger>("ping", sinks.begin(), sinks.end());
+
+    spdlog::register_logger(logger);
+
+    return logger;
+}
+
 void ping(const std::string& url)
 {
-    while (running) {
-        const auto r = cpr::Get(cpr::Url{url});
+    const auto r = cpr::Get(cpr::Url{url});
 
-        spdlog::info("{}, {} s", r.status_code, r.elapsed);
+    if (r.status_code == 200)
+        spdlog::get("ping")->info("{:.0f} ms", r.elapsed * 1000.0);
+    else if (r.status_code > 0)
+        spdlog::get("ping")->warn(r.status_line);
+    else
+        spdlog::get("ping")->error(r.error.message);
+}
+
+void continuously_ping_url(const std::string& url)
+{
+    spdlog::info("pinging {}...", url);
+
+    while (running) {
+        ping(url);
         std::this_thread::sleep_for(1s);
     }
 }
@@ -75,6 +106,7 @@ int main(int argc, char* argv[])
     auto [url] = eval_args(argc, argv);
 
     std::signal(SIGINT, signal_handler);
+    create_ping_logger();
 
-    ping(url);
+    continuously_ping_url(url);
 }

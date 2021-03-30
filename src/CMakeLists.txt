@@ -7,8 +7,10 @@ set(ALL_TARGETS
 add_executable(db_insert db_insert.cpp
                          performance.h)
 add_executable(http_ping http_ping.cpp
+                         combined_logger.cpp combined_logger.h
                          statistics.cpp statistics.h)
 add_executable(msg_ping msg_ping.cpp
+                        combined_logger.cpp combined_logger.h
                         statistics.cpp statistics.h)
 
 foreach(target ${ALL_TARGETS})

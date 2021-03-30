@@ -13,9 +13,8 @@
 #include <fmt/ostream.h>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
-#include <spdlog/sinks/basic_file_sink.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
 
+#include "combined_logger.h"
 #include "statistics.h"
 
 using namespace std::chrono_literals;
@@ -30,22 +29,6 @@ void signal_handler(int signal)
     }
 }
 
-std::shared_ptr<spdlog::logger> create_ping_logger(const std::string& logfile_name)
-{
-    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_st>();
-    console_sink->set_level(spdlog::level::info);
-
-    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_st>(logfile_name, false);
-    file_sink->set_level(spdlog::level::info);
-
-    std::vector<spdlog::sink_ptr> sinks{console_sink, file_sink};
-    auto logger = std::make_shared<spdlog::logger>("ping", sinks.begin(), sinks.end());
-
-    spdlog::register_logger(logger);
-
-    return logger;
-}
-
 std::optional<float> ping(const std::string& url, std::chrono::milliseconds timeout)
 {
     const auto r = cpr::Get(cpr::Url{url}, cpr::Timeout{timeout});
@@ -54,9 +37,9 @@ std::optional<float> ping(const std::string& url, std::chrono::milliseconds time
         return {1000.0f * static_cast<float>(r.elapsed)};
 
     if (r.status_code > 0)
-        spdlog::get("ping")->warn(r.status_line);
+        spdlog::get("combined")->warn(r.status_line);
     else
-        spdlog::get("ping")->error(r.error.message);
+        spdlog::get("combined")->error(r.error.message);
 
     return {};
 }
@@ -72,7 +55,7 @@ auto continuously_send_pings(const std::string& url, std::chrono::seconds interv
         auto ms = ping(url, timeout);
 
         if (ms.has_value()) {
-            spdlog::get("ping")->info("{:.0f}ms", ms.value());
+            spdlog::get("combined")->info("{:.0f}ms", ms.value());
             durations.push_back(ms.value());
         } else {
             ++num_errors;
@@ -136,7 +119,7 @@ int main(int argc, char* argv[])
     auto [url, logfile_name, interval, timeout] = eval_args(argc, argv);
 
     std::signal(SIGINT, signal_handler);
-    create_ping_logger(logfile_name);
+    create_combined_logger(logfile_name);
 
     const auto [durations, num_errors] = continuously_send_pings(url, interval, timeout);
 

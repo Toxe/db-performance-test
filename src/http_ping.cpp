@@ -49,11 +49,17 @@ std::shared_ptr<spdlog::logger> create_ping_logger(const std::string& logfile_na
 
 double mean(const std::vector<double>& values)
 {
+    if (values.empty())
+        return 0.0;
+
     return std::accumulate(values.begin(), values.end(), 0.0) / static_cast<double>(values.size());
 }
 
 double median(const std::vector<double>& values)
 {
+    if (values.empty())
+        return 0.0;
+
     std::vector<double> sorted_values{values};
     std::sort(sorted_values.begin(), sorted_values.end());
 

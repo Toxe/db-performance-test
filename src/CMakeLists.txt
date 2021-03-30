@@ -1,10 +1,12 @@
 set(ALL_TARGETS
     db_insert
     http_ping
+    msg_ping
 )
 
 add_executable(db_insert db_insert.cpp include/performance.h)
 add_executable(http_ping http_ping.cpp)
+add_executable(msg_ping msg_ping.cpp)
 
 foreach(target ${ALL_TARGETS})
     set_target_properties(${target} PROPERTIES CXX_EXTENSIONS OFF)
@@ -17,3 +19,4 @@ target_include_directories(db_insert PRIVATE include)
 target_link_libraries(db_insert PRIVATE clipp::clipp fmt::fmt spdlog::spdlog spdlog::spdlog_header_only nlohmann_json::nlohmann_json sqlpp11::sqlpp11 ${sqlpp11_mysql_LIBRARY} libmariadb mariadbclient)
 
 target_link_libraries(http_ping PRIVATE clipp::clipp fmt::fmt spdlog::spdlog spdlog::spdlog_header_only nlohmann_json::nlohmann_json cpr)
+target_link_libraries(msg_ping PRIVATE clipp::clipp fmt::fmt spdlog::spdlog spdlog::spdlog_header_only nlohmann_json::nlohmann_json cpr)

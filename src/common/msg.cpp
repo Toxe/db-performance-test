@@ -4,7 +4,7 @@
 
 std::optional<MessageResults> msg(cpr::Session& sess, const std::string& fqmn, std::vector<cpr::Pair> data)
 {
-    data.push_back({"msg", fqmn});
+    data.emplace_back("msg", fqmn);
     sess.SetPayload(cpr::Payload{data.begin(), data.end()});
 
     const auto r = sess.Post();

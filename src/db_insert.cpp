@@ -134,6 +134,8 @@ void test_multiple_inserts(sqlpp::mysql::connection& db, const int num_insert_ro
 
 auto eval_args(int argc, char* argv[])
 {
+    const auto description = "Run database performance tests.";
+    const auto example = "--rows 1000 --rows_per_multi_insert 100 --config ../mysql.json";
     int num_insert_rows = 10000;
     int num_rows_per_multi_insert = 1000;
     bool run_single = false;
@@ -163,7 +165,7 @@ auto eval_args(int argc, char* argv[])
     );
 
     if (!clipp::parse(argc, argv, cli))
-        show_usage_and_exit(cli, argv[0], "Run database performance tests.", "--rows 1000 --rows_per_multi_insert 100 --config ../mysql.json");
+        show_usage_and_exit(cli, argv[0], description, example);
 
     spdlog::set_level(log_level);
     spdlog::info("command line option --single: {}", run_single);
@@ -179,7 +181,7 @@ auto eval_args(int argc, char* argv[])
     }
 
     if (show_help || !(run_single || run_multi))
-        show_usage_and_exit(cli, argv[0], "Run database performance tests.", "--rows 1000 --rows_per_multi_insert 100 --config ../mysql.json");
+        show_usage_and_exit(cli, argv[0], description, example);
 
     return std::make_tuple(run_single, run_multi, db_config_filename, num_insert_rows, num_rows_per_multi_insert);
 }

@@ -41,6 +41,8 @@ void test_multiple_inserts(cpr::Session& sess, const int num_insert_rows, const 
 
 auto eval_args(int argc, char* argv[])
 {
+    const auto description = "Send messages to run database performance tests.";
+    const auto example = "https://example.com user password --rows 1000 --rows_per_multi_insert 100";
     bool show_help = false;
     auto log_level = spdlog::level::warn;
     bool run_single = false;
@@ -82,7 +84,7 @@ auto eval_args(int argc, char* argv[])
     );
 
     if (!clipp::parse(argc, argv, cli))
-        show_usage_and_exit(cli, argv[0], "Send messages to run database performance tests.", "https://example.com user password --rows 1000 --rows_per_multi_insert 100");
+        show_usage_and_exit(cli, argv[0], description, example);
 
     spdlog::set_level(log_level);
     spdlog::info("command line option \"url\": {}", url);
@@ -102,7 +104,7 @@ auto eval_args(int argc, char* argv[])
     }
 
     if (show_help)
-        show_usage_and_exit(cli, argv[0], "Send messages to run database performance tests.", "https://example.com user password --rows 1000 --rows_per_multi_insert 100");
+        show_usage_and_exit(cli, argv[0], description, example);
 
     return std::make_tuple(url, user, password, logfile_name, std::chrono::milliseconds{timeout}, run_single, run_multi, num_insert_rows, num_rows_per_multi_insert);
 }

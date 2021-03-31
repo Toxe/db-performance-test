@@ -69,6 +69,8 @@ auto continuously_send_pings(const std::string& url, std::chrono::seconds interv
 
 auto eval_args(int argc, char* argv[])
 {
+    const auto description = "Ping a URL.";
+    const auto example = "https://example.com";
     bool show_help = false;
     auto log_level = spdlog::level::warn;
     int interval = 1;
@@ -92,7 +94,7 @@ auto eval_args(int argc, char* argv[])
     );
 
     if (!clipp::parse(argc, argv, cli))
-        show_usage_and_exit(cli, argv[0], "Ping a URL.", "https://example.com");
+        show_usage_and_exit(cli, argv[0], description, example);
 
     spdlog::set_level(log_level);
     spdlog::info("command line option \"url\": {}", url);
@@ -101,7 +103,7 @@ auto eval_args(int argc, char* argv[])
     spdlog::info("command line option --timeout: {}ms", timeout);
 
     if (show_help)
-        show_usage_and_exit(cli, argv[0], "Ping a URL.", "https://example.com");
+        show_usage_and_exit(cli, argv[0], description, example);
 
     return std::make_tuple(url, logfile_name, std::chrono::seconds{interval}, std::chrono::milliseconds{timeout});
 }

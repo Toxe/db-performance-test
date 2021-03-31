@@ -29,6 +29,8 @@ void msg_create_cos(cpr::Session& sess, const int parent, const int count)
 
 auto eval_args(int argc, char* argv[])
 {
+    const auto description = "Send message to run CO creation test.";
+    const auto example = "https://example.com user password";
     bool show_help = false;
     auto log_level = spdlog::level::warn;
     int timeout = 30000;
@@ -61,7 +63,7 @@ auto eval_args(int argc, char* argv[])
     );
 
     if (!clipp::parse(argc, argv, cli))
-        show_usage_and_exit(cli, argv[0], "Send message to run CO creation test.", "https://example.com user password");
+        show_usage_and_exit(cli, argv[0], description, example);
 
     spdlog::set_level(log_level);
     spdlog::info("command line option \"url\": {}", url);
@@ -73,7 +75,7 @@ auto eval_args(int argc, char* argv[])
     spdlog::info("command line option --count: {}", count);
 
     if (show_help)
-        show_usage_and_exit(cli, argv[0], "Send message to run CO creation test.", "https://example.com user password");
+        show_usage_and_exit(cli, argv[0], description, example);
 
     return std::make_tuple(url, user, password, logfile_name, std::chrono::milliseconds{timeout}, parent, count);
 }

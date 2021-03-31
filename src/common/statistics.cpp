@@ -30,7 +30,6 @@ float median(const std::vector<float>& values)
 
 void show_stats(const std::vector<float>& durations, const int num_errors)
 {
-    spdlog::get("combined")->info("successful: {}, errors: {}", durations.size(), num_errors);
-    spdlog::get("combined")->info("mean: {:.2f}ms", mean(durations));
-    spdlog::get("combined")->info("median: {:.2f}ms", median(durations));
+    spdlog::get("combined")->info("successful: {}, errors: {}, mean: {:.2f}ms, median: {:.2f}ms",
+        durations.size(), num_errors, mean(durations), median(durations));
 }

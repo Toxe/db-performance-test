@@ -138,7 +138,7 @@ auto eval_args(int argc, char* argv[])
     );
 
     if (!clipp::parse(argc, argv, cli))
-        show_usage_and_exit(cli, argv[0], "Send ping messages.");
+        show_usage_and_exit(cli, argv[0], "Send ping messages.", "https://example.com user password");
 
     spdlog::set_level(log_level);
     spdlog::info("command line option \"url\": {}", url);
@@ -149,7 +149,7 @@ auto eval_args(int argc, char* argv[])
     spdlog::info("command line option --timeout: {}ms", timeout);
 
     if (show_help)
-        show_usage_and_exit(cli, argv[0], "Send ping messages.");
+        show_usage_and_exit(cli, argv[0], "Send ping messages.", "https://example.com user password");
 
     return std::make_tuple(url, user, password, logfile_name, std::chrono::seconds{interval}, std::chrono::milliseconds{timeout});
 }

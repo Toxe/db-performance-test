@@ -1,6 +1,8 @@
 set(ALL_TARGETS
     db_insert
     http_ping
+    msg_create_cos
+    msg_db_insert
     msg_ping
 )
 
@@ -11,6 +13,12 @@ add_executable(http_ping http_ping.cpp
                          combined_logger.cpp combined_logger.h
                          statistics.cpp statistics.h
                          usage.cpp usage.h)
+add_executable(msg_create_cos msg_create_cos.cpp
+                              combined_logger.cpp combined_logger.h
+                              usage.cpp usage.h)
+add_executable(msg_db_insert msg_db_insert.cpp
+                             combined_logger.cpp combined_logger.h
+                             usage.cpp usage.h)
 add_executable(msg_ping msg_ping.cpp
                         combined_logger.cpp combined_logger.h
                         statistics.cpp statistics.h
@@ -25,4 +33,6 @@ endforeach()
 
 target_link_libraries(db_insert PRIVATE clipp::clipp fmt::fmt spdlog::spdlog spdlog::spdlog_header_only nlohmann_json::nlohmann_json sqlpp11::sqlpp11 ${sqlpp11_mysql_LIBRARY} libmariadb mariadbclient)
 target_link_libraries(http_ping PRIVATE clipp::clipp fmt::fmt spdlog::spdlog spdlog::spdlog_header_only nlohmann_json::nlohmann_json cpr)
+target_link_libraries(msg_create_cos PRIVATE clipp::clipp fmt::fmt spdlog::spdlog spdlog::spdlog_header_only nlohmann_json::nlohmann_json cpr)
+target_link_libraries(msg_db_insert PRIVATE clipp::clipp fmt::fmt spdlog::spdlog spdlog::spdlog_header_only nlohmann_json::nlohmann_json cpr)
 target_link_libraries(msg_ping PRIVATE clipp::clipp fmt::fmt spdlog::spdlog spdlog::spdlog_header_only nlohmann_json::nlohmann_json cpr)

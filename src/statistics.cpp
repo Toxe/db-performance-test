@@ -4,6 +4,7 @@
 #include <numeric>
 
 #include <fmt/core.h>
+#include <spdlog/spdlog.h>
 
 float mean(const std::vector<float>& values)
 {
@@ -29,7 +30,7 @@ float median(const std::vector<float>& values)
 
 void show_stats(const std::vector<float>& durations, const int num_errors)
 {
-    fmt::print("successful: {}, errors: {}\n", durations.size(), num_errors);
-    fmt::print("mean: {:.2f}ms\n", mean(durations));
-    fmt::print("median: {:.2f}ms\n", median(durations));
+    spdlog::get("combined")->info("successful: {}, errors: {}", durations.size(), num_errors);
+    spdlog::get("combined")->info("mean: {:.2f}ms", mean(durations));
+    spdlog::get("combined")->info("median: {:.2f}ms", median(durations));
 }

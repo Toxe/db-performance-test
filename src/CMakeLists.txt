@@ -8,6 +8,7 @@ set(ALL_TARGETS
 
 add_executable(db_insert db_insert.cpp
                          performance.h
+                         common/combined_logger.cpp common/combined_logger.h
                          common/usage.cpp common/usage.h)
 add_executable(http_ping http_ping.cpp
                          common/combined_logger.cpp common/combined_logger.h

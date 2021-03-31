@@ -13,6 +13,7 @@
 #include <sqlpp11/sqlpp11.h>
 
 #include "performance.h"
+#include "common/combined_logger.h"
 #include "common/usage.h"
 
 using namespace std::chrono_literals;
@@ -100,7 +101,7 @@ void test_single_inserts(sqlpp::mysql::connection& db, const int num_insert_rows
 
     auto t1 = std::chrono::high_resolution_clock::now();
 
-    fmt::print("test single: {} rows in {} ms\n", num_insert_rows, std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count());
+    spdlog::get("combined")->info("test single: {} rows in {}ms", num_insert_rows, std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count());
 }
 
 void test_multiple_inserts(sqlpp::mysql::connection& db, const int num_insert_rows, const int num_rows_per_multi_insert)
@@ -129,7 +130,7 @@ void test_multiple_inserts(sqlpp::mysql::connection& db, const int num_insert_ro
 
     auto t1 = std::chrono::high_resolution_clock::now();
 
-    fmt::print("test multi: {} rows in {} ms\n", num_insert_rows, std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count());
+    spdlog::get("combined")->info("test multi: {} rows in {}ms", num_insert_rows, std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count());
 }
 
 auto eval_args(int argc, char* argv[])
@@ -144,6 +145,7 @@ auto eval_args(int argc, char* argv[])
     bool show_help = false;
     auto log_level = spdlog::level::warn;
     std::string db_config_filename{"mysql.json"};
+    std::string logfile_name{"logs/db_insert.log"};
 
     auto cli = (
         (clipp::option("--single").set(run_single).set(run_all, false)
@@ -158,6 +160,8 @@ auto eval_args(int argc, char* argv[])
             % fmt::format("number of insert rows (default: {})", num_insert_rows),
         (clipp::option("--rows_per_multi_insert") & clipp::value("num_rows_per_multi_insert", num_rows_per_multi_insert))
             % fmt::format("number of rows per multi insert (default: {})", num_rows_per_multi_insert),
+        (clipp::option("--log") & clipp::value("logfile", logfile_name))
+            % fmt::format("logfile name (default: {})", logfile_name),
         clipp::option("-h", "--help").set(show_help)
             % "show help",
         clipp::option("-v", "--verbose").set(log_level, spdlog::level::info)
@@ -174,6 +178,7 @@ auto eval_args(int argc, char* argv[])
     spdlog::info("command line option --config: {}", db_config_filename);
     spdlog::info("command line option --rows: {}", num_insert_rows);
     spdlog::info("command line option --rows_per_multi_insert: {}", num_rows_per_multi_insert);
+    spdlog::info("command line option --log: {}", logfile_name);
 
     if (run_all) {
         run_single = true;
@@ -183,14 +188,16 @@ auto eval_args(int argc, char* argv[])
     if (show_help || !(run_single || run_multi))
         show_usage_and_exit(cli, argv[0], description, example);
 
-    return std::make_tuple(run_single, run_multi, db_config_filename, num_insert_rows, num_rows_per_multi_insert);
+    return std::make_tuple(run_single, run_multi, db_config_filename, num_insert_rows, num_rows_per_multi_insert, logfile_name);
 }
 
 int main(int argc, char* argv[])
 {
-    auto [run_single, run_multi, db_config_filename, num_insert_rows, num_rows_per_multi_insert] = eval_args(argc, argv);
+    auto [run_single, run_multi, db_config_filename, num_insert_rows, num_rows_per_multi_insert, logfile_name] = eval_args(argc, argv);
     auto config = read_mysql_config(db_config_filename);
     auto db = connect_database(config);
+
+    create_combined_logger(logfile_name);
 
     drop_table(db, "performance");
     create_table(db, "performance");

@@ -13,7 +13,7 @@
 #include <sqlpp11/sqlpp11.h>
 
 #include "performance.h"
-#include "usage.h"
+#include "common/usage.h"
 
 using namespace std::chrono_literals;
 

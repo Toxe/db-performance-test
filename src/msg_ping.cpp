@@ -12,10 +12,10 @@
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 
-#include "combined_logger.h"
-#include "msg.h"
-#include "statistics.h"
-#include "usage.h"
+#include "common/combined_logger.h"
+#include "common/msg.h"
+#include "common/statistics.h"
+#include "common/usage.h"
 
 using namespace std::chrono_literals;
 

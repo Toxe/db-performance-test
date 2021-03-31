@@ -8,24 +8,24 @@ set(ALL_TARGETS
 
 add_executable(db_insert db_insert.cpp
                          performance.h
-                         usage.cpp usage.h)
+                         common/usage.cpp common/usage.h)
 add_executable(http_ping http_ping.cpp
-                         combined_logger.cpp combined_logger.h
-                         statistics.cpp statistics.h
-                         usage.cpp usage.h)
+                         common/combined_logger.cpp common/combined_logger.h
+                         common/statistics.cpp common/statistics.h
+                         common/usage.cpp common/usage.h)
 add_executable(msg_create_cos msg_create_cos.cpp
-                              combined_logger.cpp combined_logger.h
-                              msg.cpp msg.h
-                              usage.cpp usage.h)
+                              common/combined_logger.cpp common/combined_logger.h
+                              common/msg.cpp common/msg.h
+                              common/usage.cpp common/usage.h)
 add_executable(msg_db_insert msg_db_insert.cpp
-                             combined_logger.cpp combined_logger.h
-                             msg.cpp msg.h
-                             usage.cpp usage.h)
+                             common/combined_logger.cpp common/combined_logger.h
+                             common/msg.cpp common/msg.h
+                             common/usage.cpp common/usage.h)
 add_executable(msg_ping msg_ping.cpp
-                        combined_logger.cpp combined_logger.h
-                        msg.cpp msg.h
-                        statistics.cpp statistics.h
-                        usage.cpp usage.h)
+                        common/combined_logger.cpp common/combined_logger.h
+                        common/msg.cpp common/msg.h
+                        common/statistics.cpp common/statistics.h
+                        common/usage.cpp common/usage.h)
 
 foreach(target ${ALL_TARGETS})
     set_target_properties(${target} PROPERTIES CXX_EXTENSIONS OFF)

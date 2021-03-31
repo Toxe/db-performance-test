@@ -15,12 +15,15 @@ add_executable(http_ping http_ping.cpp
                          usage.cpp usage.h)
 add_executable(msg_create_cos msg_create_cos.cpp
                               combined_logger.cpp combined_logger.h
+                              msg.cpp msg.h
                               usage.cpp usage.h)
 add_executable(msg_db_insert msg_db_insert.cpp
                              combined_logger.cpp combined_logger.h
+                             msg.cpp msg.h
                              usage.cpp usage.h)
 add_executable(msg_ping msg_ping.cpp
                         combined_logger.cpp combined_logger.h
+                        msg.cpp msg.h
                         statistics.cpp statistics.h
                         usage.cpp usage.h)
 

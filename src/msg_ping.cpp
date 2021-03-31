@@ -1,6 +1,5 @@
 #include <chrono>
 #include <csignal>
-#include <optional>
 #include <string>
 #include <thread>
 #include <tuple>
@@ -14,6 +13,7 @@
 #include <spdlog/spdlog.h>
 
 #include "combined_logger.h"
+#include "msg.h"
 #include "statistics.h"
 #include "usage.h"
 
@@ -29,36 +29,6 @@ void signal_handler(int signal)
     }
 }
 
-std::optional<float> msg(cpr::Session& sess, const std::string& fqmn, std::vector<cpr::Pair> data)
-{
-    data.push_back({"msg", fqmn});
-    sess.SetPayload(cpr::Payload{data.begin(), data.end()});
-
-    const auto r = sess.Post();
-
-    if (r.status_code != 200) {
-        if (r.status_code > 0)
-            spdlog::get("combined")->warn(r.status_line);
-        else
-            spdlog::get("combined")->error(r.error.message);
-
-        return {};
-    }
-
-    const auto json = nlohmann::json::parse(r.text);
-
-    if (json["status"] != 0) {
-        if (json["status"] > 0)
-            spdlog::get("combined")->warn("{} ({})", json["status_msg"], json["status"]);
-        else
-            spdlog::get("combined")->error("{} ({})", json["status_msg"], json["status"]);
-
-        return {};
-    }
-
-    return {1000.0f * static_cast<float>(r.elapsed)};
-}
-
 auto continuously_send_pings(cpr::Session& sess, std::chrono::seconds interval)
 {
     spdlog::info("sending messages to {}...", sess.Get().url);
@@ -67,11 +37,11 @@ auto continuously_send_pings(cpr::Session& sess, std::chrono::seconds interval)
     std::vector<float> durations;
 
     while (running) {
-        auto ms = msg(sess, "performance.ping", {});
+        const auto res = msg(sess, "performance.ping", {});
 
-        if (ms.has_value()) {
-            spdlog::get("combined")->info("{:.0f}ms", ms.value());
-            durations.push_back(ms.value());
+        if (res.has_value() && res->status == 0) {
+            spdlog::get("combined")->info("{:.0f}ms", res->elapsed);
+            durations.push_back(res->elapsed);
         } else {
             ++num_errors;
         }
@@ -80,31 +50,6 @@ auto continuously_send_pings(cpr::Session& sess, std::chrono::seconds interval)
     }
 
     return std::make_tuple(durations, num_errors);
-}
-
-cpr::Session login(const std::string& url, const std::string& user, const std::string& password, std::chrono::milliseconds timeout)
-{
-    spdlog::info("login...");
-
-    cpr::Session sess;
-    sess.SetUrl(url + "/cmd.php");
-    sess.SetTimeout(timeout);
-
-    auto res = msg(sess, "login.login", {{"login", user}, {"pwd", password}});
-
-    if (!res.has_value()) {
-        spdlog::error("login failed");
-        std::exit(2);
-    }
-
-    return sess;
-}
-
-void logout(cpr::Session& sess)
-{
-    spdlog::info("logout...");
-
-    msg(sess, "login.logout", {});
 }
 
 auto eval_args(int argc, char* argv[])
@@ -161,9 +106,9 @@ int main(int argc, char* argv[])
     std::signal(SIGINT, signal_handler);
     create_combined_logger(logfile_name);
 
-    auto sess = login(url, user, password, timeout);
+    auto sess = msg_login(url, user, password, timeout);
     const auto [durations, num_errors] = continuously_send_pings(sess, interval);
-    logout(sess);
+    msg_logout(sess);
 
     show_stats(durations, num_errors);
 }

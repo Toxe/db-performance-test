@@ -1,6 +1,5 @@
 #include <chrono>
 #include <csignal>
-#include <optional>
 #include <string>
 #include <thread>
 #include <tuple>
@@ -14,6 +13,7 @@
 #include <spdlog/spdlog.h>
 
 #include "combined_logger.h"
+#include "msg.h"
 #include "usage.h"
 
 using namespace std::chrono_literals;
@@ -28,79 +28,26 @@ void signal_handler(int signal)
     }
 }
 
-std::optional<nlohmann::json> msg(cpr::Session& sess, const std::string& fqmn, std::vector<cpr::Pair> data)
-{
-    data.push_back({"msg", fqmn});
-    sess.SetPayload(cpr::Payload{data.begin(), data.end()});
-
-    const auto r = sess.Post();
-
-    if (r.status_code != 200) {
-        if (r.status_code > 0)
-            spdlog::get("combined")->warn(r.status_line);
-        else
-            spdlog::get("combined")->error(r.error.message);
-
-        return {};
-    }
-
-    const auto json = nlohmann::json::parse(r.text);
-
-    if (json["status"] != 0) {
-        if (json["status"] > 0)
-            spdlog::get("combined")->warn("{} ({})", json["status_msg"], json["status"]);
-        else
-            spdlog::get("combined")->error("{} ({})", json["status_msg"], json["status"]);
-    }
-
-    return {json};
-}
-
 void test_single_inserts(cpr::Session& sess, const int num_insert_rows)
 {
     spdlog::info("run test: single inserts for every row");
 
-    const auto json = msg(sess, "performance.db_insert_single",
+    const auto res = msg(sess, "performance.db_insert_single",
         {{"rows", std::to_string(num_insert_rows)}});
 
-    if (json.has_value() && (*json)["status"] == 0)
-        spdlog::get("combined")->info("{}ms", (*json)["duration"]);
+    if (res.has_value() && res->status == 0)
+        spdlog::get("combined")->info("{}ms", res->json["duration"]);
 }
 
 void test_multiple_inserts(cpr::Session& sess, const int num_insert_rows, const int num_rows_per_multi_insert)
 {
     spdlog::info("run test: insert multiple rows in one request");
 
-    const auto json = msg(sess, "performance.db_insert_multi",
+    const auto res = msg(sess, "performance.db_insert_multi",
         {{"rows", std::to_string(num_insert_rows)}, {"rows_per_multi_insert", std::to_string(num_rows_per_multi_insert)}});
 
-    if (json.has_value() && (*json)["status"] == 0)
-        spdlog::get("combined")->info("{}ms", (*json)["duration"]);
-}
-
-cpr::Session msg_login(const std::string& url, const std::string& user, const std::string& password, std::chrono::milliseconds timeout)
-{
-    spdlog::info("login...");
-
-    cpr::Session sess;
-    sess.SetUrl(url + "/cmd.php");
-    sess.SetTimeout(timeout);
-
-    const auto json = msg(sess, "login.login", {{"login", user}, {"pwd", password}});
-
-    if (!json.has_value() || (*json)["status"] != 0) {
-        spdlog::error("login failed");
-        std::exit(2);
-    }
-
-    return sess;
-}
-
-void msg_logout(cpr::Session& sess)
-{
-    spdlog::info("logout...");
-
-    msg(sess, "login.logout", {});
+    if (res.has_value() && res->status == 0)
+        spdlog::get("combined")->info("{}ms", res->json["duration"]);
 }
 
 auto eval_args(int argc, char* argv[])

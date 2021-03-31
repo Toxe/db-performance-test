@@ -25,7 +25,7 @@ void test_single_inserts(cpr::Session& sess, const int num_insert_rows)
         {{"rows", std::to_string(num_insert_rows)}});
 
     if (res.has_value() && res->status == 0)
-        spdlog::get("combined")->info("{}ms", res->json["duration"]);
+        spdlog::get("combined")->info("test single: {} rows in {}ms", num_insert_rows, res->json["duration"]);
 }
 
 void test_multiple_inserts(cpr::Session& sess, const int num_insert_rows, const int num_rows_per_multi_insert)
@@ -36,7 +36,7 @@ void test_multiple_inserts(cpr::Session& sess, const int num_insert_rows, const 
         {{"rows", std::to_string(num_insert_rows)}, {"rows_per_multi_insert", std::to_string(num_rows_per_multi_insert)}});
 
     if (res.has_value() && res->status == 0)
-        spdlog::get("combined")->info("{}ms", res->json["duration"]);
+        spdlog::get("combined")->info("test multi: {} rows in {}ms", num_insert_rows, res->json["duration"]);
 }
 
 auto eval_args(int argc, char* argv[])

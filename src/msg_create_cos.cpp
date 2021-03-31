@@ -1,5 +1,4 @@
 #include <chrono>
-#include <csignal>
 #include <string>
 #include <thread>
 #include <tuple>
@@ -17,16 +16,6 @@
 #include "common/usage.h"
 
 using namespace std::chrono_literals;
-
-bool running = true;
-
-void signal_handler(int signal)
-{
-    if (signal == SIGINT) {
-        fmt::print("\n");
-        running = false;
-    }
-}
 
 void msg_create_cos(cpr::Session& sess, const int parent, const int count)
 {
@@ -93,7 +82,6 @@ int main(int argc, char* argv[])
 {
     const auto [url, user, password, logfile_name, timeout, parent, count] = eval_args(argc, argv);
 
-    std::signal(SIGINT, signal_handler);
     create_combined_logger(logfile_name);
 
     auto sess = msg_login(url, user, password, timeout);

@@ -1,5 +1,4 @@
 #include <chrono>
-#include <csignal>
 #include <string>
 #include <thread>
 #include <tuple>
@@ -17,16 +16,6 @@
 #include "common/usage.h"
 
 using namespace std::chrono_literals;
-
-bool running = true;
-
-void signal_handler(int signal)
-{
-    if (signal == SIGINT) {
-        fmt::print("\n");
-        running = false;
-    }
-}
 
 void test_single_inserts(cpr::Session& sess, const int num_insert_rows)
 {
@@ -122,7 +111,6 @@ int main(int argc, char* argv[])
 {
     const auto [url, user, password, logfile_name, timeout, run_single, run_multi, num_insert_rows, num_rows_per_multi_insert] = eval_args(argc, argv);
 
-    std::signal(SIGINT, signal_handler);
     create_combined_logger(logfile_name);
 
     auto sess = msg_login(url, user, password, timeout);

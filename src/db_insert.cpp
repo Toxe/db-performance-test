@@ -130,7 +130,7 @@ void test_multiple_inserts(sqlpp::mysql::connection& db, const int num_insert_ro
 
     auto t1 = std::chrono::high_resolution_clock::now();
 
-    spdlog::get("combined")->info("test multi: {} rows in {}ms", num_insert_rows, std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count());
+    spdlog::get("combined")->info("test multi: {} rows in {}ms (rows per insert: {})", num_insert_rows, std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count(), num_rows_per_multi_insert);
 }
 
 auto eval_args(int argc, char* argv[])

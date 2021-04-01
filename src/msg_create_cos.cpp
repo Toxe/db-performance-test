@@ -17,11 +17,11 @@
 
 using namespace std::chrono_literals;
 
-void msg_create_cos(cpr::Session& sess, const int parent, const int count)
+void msg_create_cos(cpr::Session& sess, const int count)
 {
     spdlog::info("sending message to {}...", sess.Get().url);
 
-    const auto res = msg(sess, "performance.create_cos", {{"parent", std::to_string(parent)}, {"count", std::to_string(count)}});
+    const auto res = msg(sess, "performance.create_cos", {{"count", std::to_string(count)}});
 
     if (res.has_value() && res->status == 0)
         spdlog::get("combined")->info("{}ms (count: {})", res->json["duration"], count);
@@ -34,7 +34,6 @@ auto eval_args(int argc, char* argv[])
     bool show_help = false;
     auto log_level = spdlog::level::warn;
     int timeout = 30000;
-    int parent = 0;
     int count = 10;
     std::string url;
     std::string user;
@@ -52,8 +51,6 @@ auto eval_args(int argc, char* argv[])
             % "Login user name",
         clipp::value("password", password)
             % "Login password",
-        clipp::value("parent", parent)
-            % "COID parent",
         (clipp::option("--log") & clipp::value("logfile", logfile_name))
             % fmt::format("logfile name (default: {})", logfile_name),
         (clipp::option("--timeout") & clipp::integer("timeout", timeout))
@@ -69,7 +66,6 @@ auto eval_args(int argc, char* argv[])
     spdlog::info("command line option \"url\": {}", url);
     spdlog::info("command line option \"user\": {}", user);
     spdlog::info("command line option \"password\": ???");
-    spdlog::info("command line option \"parent\": ", parent);
     spdlog::info("command line option --log: {}", logfile_name);
     spdlog::info("command line option --timeout: {}ms", timeout);
     spdlog::info("command line option --count: {}", count);
@@ -77,16 +73,16 @@ auto eval_args(int argc, char* argv[])
     if (show_help)
         show_usage_and_exit(cli, argv[0], description, example);
 
-    return std::make_tuple(url, user, password, logfile_name, std::chrono::milliseconds{timeout}, parent, count);
+    return std::make_tuple(url, user, password, logfile_name, std::chrono::milliseconds{timeout}, count);
 }
 
 int main(int argc, char* argv[])
 {
-    const auto [url, user, password, logfile_name, timeout, parent, count] = eval_args(argc, argv);
+    const auto [url, user, password, logfile_name, timeout, count] = eval_args(argc, argv);
 
     create_combined_logger(logfile_name);
 
     auto sess = msg_login(url, user, password, timeout);
-    msg_create_cos(sess, parent, count);
+    msg_create_cos(sess, count);
     msg_logout(sess);
 }

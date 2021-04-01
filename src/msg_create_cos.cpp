@@ -24,7 +24,7 @@ void msg_create_cos(cpr::Session& sess, const int parent, const int count)
     const auto res = msg(sess, "performance.create_cos", {{"parent", std::to_string(parent)}, {"count", std::to_string(count)}});
 
     if (res.has_value() && res->status == 0)
-        spdlog::get("combined")->info("{}ms", res->json["duration"]);
+        spdlog::get("combined")->info("{}ms (count: {})", res->json["duration"], count);
 }
 
 auto eval_args(int argc, char* argv[])

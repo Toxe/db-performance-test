@@ -55,7 +55,7 @@ auto continuously_send_pings(const std::string& url, std::chrono::seconds interv
         auto ms = ping(url, timeout);
 
         if (ms.has_value()) {
-            spdlog::get("combined")->info("{:.0f}ms", ms.value());
+            spdlog::get("combined")->info("{} --> {:.0f}ms", url, ms.value());
             durations.push_back(ms.value());
         } else {
             ++num_errors;
@@ -117,5 +117,5 @@ int main(int argc, char* argv[])
 
     const auto [durations, num_errors] = continuously_send_pings(url, interval, timeout);
 
-    show_stats(durations, num_errors);
+    show_stats(url, durations, num_errors);
 }

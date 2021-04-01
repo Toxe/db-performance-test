@@ -40,7 +40,7 @@ auto continuously_send_pings(cpr::Session& sess, std::chrono::seconds interval)
         const auto res = msg(sess, "performance.ping", {});
 
         if (res.has_value() && res->status == 0) {
-            spdlog::get("combined")->info("{:.0f}ms", res->elapsed);
+            spdlog::get("combined")->info("{} --> {:.0f}ms", sess.Get().url, res->elapsed);
             durations.push_back(res->elapsed);
         } else {
             ++num_errors;
@@ -112,5 +112,5 @@ int main(int argc, char* argv[])
     const auto [durations, num_errors] = continuously_send_pings(sess, interval);
     msg_logout(sess);
 
-    show_stats(durations, num_errors);
+    show_stats(url, durations, num_errors);
 }

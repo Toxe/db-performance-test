@@ -28,8 +28,8 @@ float median(const std::vector<float>& values)
         return (sorted_values[sorted_values.size() / 2 - 1] + sorted_values[sorted_values.size() / 2]) / 2.0f;
 }
 
-void show_stats(const std::vector<float>& durations, const int num_errors)
+void show_stats(const std::string& url, const std::vector<float>& durations, const int num_errors)
 {
-    spdlog::get("combined")->info("successful: {}, errors: {}, mean: {:.2f}ms, median: {:.2f}ms",
-        durations.size(), num_errors, mean(durations), median(durations));
+    spdlog::get("combined")->info("{} --> successful: {}, errors: {}, mean: {:.2f}ms, median: {:.2f}ms",
+        url, durations.size(), num_errors, mean(durations), median(durations));
 }

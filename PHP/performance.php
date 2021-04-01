@@ -70,11 +70,10 @@ function msg_performance_db_insert_multi($in, &$out)
 
 // performance.create_cos {{{
 MSG("performance.create_cos", array(
-    "in"    => array("parent" => PARAM_COID,
-                     "count"  => PARAM_INT),
+    "in"    => array("count"  => PARAM_INT),
     "out"   => array("duration"),
     "check" => array("dev"),
-    "doc"   => "COs unterhalb eines Parents anlegen."
+    "doc"   => "COs unterhalb eines Users anlegen."
 ));
 
 function msg_performance_create_cos($in, &$out)
@@ -87,7 +86,7 @@ function msg_performance_create_cos($in, &$out)
     if ($count < 1)
         return -1;
 
-    $co_parent = CO::load($in["parent"]);
+    $co_parent = CURRENT_USER();
 
     if (!$co_parent)
         return -2;

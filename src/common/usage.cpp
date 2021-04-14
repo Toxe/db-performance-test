@@ -1,5 +1,6 @@
 #include "usage.h"
 
+#include <cstdlib>
 #include <filesystem>
 #include <string>
 

@@ -23,5 +23,8 @@ find_package(Sqlpp11 CONFIG REQUIRED)
 find_package(unofficial-libmariadb CONFIG REQUIRED)
 
 find_library(sqlpp11_mysql_LIBRARY sqlpp-mysql)
+find_library(pcre2_LIBRARY pcre2-8)
+
+find_path(pcre2_INCLUDE_DIRS pcre2.h)
 
 add_subdirectory(src)

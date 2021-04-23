@@ -1,6 +1,6 @@
 {
     "name": "db-performance-test",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "builtin-baseline": "9f6157af4e5b04ab3cc63150a20b1bad901a7d0b",
     "dependencies": [
         {
@@ -30,6 +30,10 @@
         {
             "name": "libmariadb",
             "version>=": "3.1.10#5"
+        },
+        {
+            "name": "pcre2",
+            "version>=": "10.35#2"
         }
     ]
 }

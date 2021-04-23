@@ -21,8 +21,6 @@ void convert_file(std::ifstream& in, std::ofstream& out, pcre2_code* re, pcre2_m
         const PCRE2_SPTR subject = reinterpret_cast<PCRE2_SPTR>(line.c_str());
         const int rc = pcre2_jit_match(re, subject, line.size(), 0, 0, match_data, mcontext);
 
-        spdlog::info("rc: {}, line: {}", rc, line);
-
         if (rc == 3+1) {
             const PCRE2_SIZE* ovector = pcre2_get_ovector_pointer(match_data);
 
@@ -126,6 +124,5 @@ int main(int argc, char* argv[])
     std::ofstream out{csvfile_name};
 
     convert_file(in, out, re, mcontext, match_data);
-
     cleanup_pcre2(re, mcontext, jit_stack, match_data);
 }

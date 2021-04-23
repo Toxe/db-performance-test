@@ -17,6 +17,8 @@ void convert_file(std::ifstream& in, std::ofstream& out, pcre2_code* re, pcre2_m
 {
     std::string line;
 
+    out << "\"time\",\"url\",\"ms\"\n";
+
     while (std::getline(in, line)) {
         const PCRE2_SPTR subject = reinterpret_cast<PCRE2_SPTR>(line.c_str());
         const int rc = pcre2_jit_match(re, subject, line.size(), 0, 0, match_data, mcontext);

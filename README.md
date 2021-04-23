@@ -14,6 +14,7 @@ Tools for testing database and server performance.
     - sqlpp11
     - sqlpp11-connector-mysql
     - libmariadb
+    - pcre2
 
 ## Usage
 
@@ -177,4 +178,28 @@ OPTIONS
 
 EXAMPLE
     $ msg_create_cos https://example.com user password
+```
+
+### convert_log_to_csv
+
+```
+DESCRIPTION
+    Convert log file to CSV.
+
+SYNOPSIS
+        convert_log_to_csv [-h] [-v] <logfile_name> <csvfile_name>
+
+OPTIONS
+        -h, --help  show help
+        -v, --verbose
+                    show verbose output
+
+        <logfile_name>
+                    log file name
+
+        <csvfile_name>
+                    CSV file name
+
+EXAMPLE
+    $ convert_log_to_csv logs/http_ping.log http_ping.csv
 ```
